@@ -30,6 +30,11 @@ class LocalityAdmin(admin.ModelAdmin):
     search_fields = ('name', 'postal_code')
 
 
+@admin.register(Neighborhood)
+class NeighborhoodAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'code')
+
+
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     search_fields = ('name',)

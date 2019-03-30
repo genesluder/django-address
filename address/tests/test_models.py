@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.db.models import Model
 from address.models import *
-from address.models import to_python
+from address.models import to_python, create_address
 
 # Python 3 fixes.
 import sys
@@ -11,6 +11,42 @@ if sys.version > '3':
     long = int
     basestring = (str, bytes)
     unicode = str
+
+
+
+class CreateAddressTestCase(TestCase):
+
+    def test_create_address(self):
+
+        data = {
+            'raw': '9319 N New York Ave Portland, OR 97203',
+            'country': 'United States',
+            'state': 'Oregon',
+            'locality': 'Portland',
+            'sublocality': '',
+            'neighborhood': 'North Portland',
+            'postal_code': '97203',
+            'street_number': '9319',
+            'route': 'North New York Ave',
+            'formatted': '9319 N New York Ave, Portland, OR 97203, USA',
+            'latitude': 45.5954592,
+            'longitude': -122.7519959,
+        }
+
+        address = create_address(data)
+
+        qs = Country.objects.all()
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs[0].name, 'United States')
+
+        qs = State.objects.all()
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs[0].name, 'Portland')
+
+        qs = Address.objects.all()
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs[0].formatted, '9319 N New York Ave, Portland, OR 97203, USA')
+
 
 
 class CountryTestCase(TestCase):

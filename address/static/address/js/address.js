@@ -12,6 +12,8 @@ $(function () {
 					'country',
 					'country_code',
 					'locality',
+					'sublocality',
+					'neighborhood',
 					'postal_code',
 					'route',
 					'street_number',

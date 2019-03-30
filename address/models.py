@@ -18,7 +18,7 @@ if sys.version > '3':
     basestring = (str, bytes)
     unicode = str
 
-__all__ = ['Country', 'State', 'Locality', 'Address', 'AddressField']
+__all__ = ['Country', 'State', 'Locality', 'Neighborhood', 'Address', 'AddressField']
 
 
 class InconsistentDictError(Exception):
@@ -33,6 +33,7 @@ def _to_python(value):
     state_code = value.get('state_code', '')
     locality = value.get('locality', '')
     sublocality = value.get('sublocality', '')
+    neighborhood = value.get('neighborhood', '')
     postal_code = value.get('postal_code', '')
     street_number = value.get('street_number', '')
     route = value.get('route', '')
@@ -87,6 +88,15 @@ def _to_python(value):
         else:
             locality_obj = None
 
+    # Handle the neighborhod.
+    try:
+        neighborhood_obj = Neighborhood.objects.get(name=neighborhood, postal_code=postal_code, locality=locality_obj)
+    except Neighborhood.DoesNotExist:
+        if neighborhood:
+            neighborhood_obj = Neighborhood.objects.create(name=neighborhood, postal_code=postal_code, locality=locality_obj)
+        else:
+            neighborhood_obj = None
+
     # Handle the address.
     try:
         if not (street_number or route or locality):
@@ -103,6 +113,7 @@ def _to_python(value):
             route=route,
             raw=raw,
             locality=locality_obj,
+            neighborhood=neighborhood_obj,
             formatted=formatted,
             latitude=latitude,
             longitude=longitude,
@@ -228,6 +239,37 @@ class Locality(models.Model):
             txt += ', %s' % cntry
         return txt
 
+
+##
+# A neighborhood (suburb).
+##
+
+
+@python_2_unicode_compatible
+class Neighborhood(models.Model):
+    name = models.CharField(max_length=165, blank=True)
+    postal_code = models.CharField(max_length=10, blank=True)
+    locality = models.ForeignKey(Locality, on_delete=models.CASCADE, related_name='neighborhoods')
+
+    class Meta:
+        verbose_name_plural = 'Neighborhoods'
+        unique_together = ('name', 'postal_code', 'locality')
+        ordering = ('locality', 'name')
+
+    def __str__(self):
+        txt = '%s' % self.name
+        locality = str(self.locality) if self.locality else ''
+        if txt and locality:
+            txt += ', '
+        txt += locality
+        if self.postal_code:
+            txt += ' %s' % self.postal_code
+        cntry = '%s' % (self.locality.state.country if self.locality and self.locality.state and self.locality.state.country else '')
+        if cntry:
+            txt += ', %s' % cntry
+        return txt
+
+
 ##
 # An address. If for any reason we are unable to find a matching
 # decomposed address we will store the raw address string in `raw`.
@@ -239,6 +281,7 @@ class Address(models.Model):
     street_number = models.CharField(max_length=20, blank=True)
     route = models.CharField(max_length=100, blank=True)
     locality = models.ForeignKey(Locality, on_delete=models.CASCADE, related_name='addresses', blank=True, null=True)
+    neighborhood = models.ForeignKey(Neighborhood, on_delete=models.CASCADE, related_name='addresses', blank=True, null=True)
     raw = models.CharField(max_length=200)
     formatted = models.CharField(max_length=200, blank=True)
     latitude = models.FloatField(blank=True, null=True)
@@ -305,9 +348,9 @@ class AddressDescriptor(ForwardManyToOneDescriptor):
 class AddressField(models.ForeignKey):
     description = 'An address'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, on_delete=models.CASCADE, *args, **kwargs):
         kwargs['to'] = 'address.Address'
-        super(AddressField, self).__init__(*args, **kwargs)
+        super(AddressField, self).__init__(*args, **kwargs, on_delete=on_delete)
 
     def contribute_to_class(self, cls, name, virtual_only=False):
         from address.compat import compat_contribute_to_class
@@ -327,3 +370,7 @@ class AddressField(models.ForeignKey):
         defaults = dict(form_class=AddressFormField)
         defaults.update(kwargs)
         return super(AddressField, self).formfield(**defaults)
+
+
+def create_address(data):
+    return to_python(data)

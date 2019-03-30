@@ -17,7 +17,7 @@ JQUERY_URL = getattr(settings, 'JQUERY_URL', 'https://ajax.googleapis.com/ajax/l
 
 class AddressWidget(forms.TextInput):
     components = [('country', 'country'), ('country_code', 'country_short'),
-                  ('locality', 'locality'), ('sublocality', 'sublocality'),
+                  ('locality', 'locality'), ('sublocality', 'sublocality'), ('neighborhood', 'neighborhood'),
                   ('postal_code', 'postal_code'), ('route', 'route'),
                   ('street_number', 'street_number'),
                   ('state', 'administrative_area_level_1'),
