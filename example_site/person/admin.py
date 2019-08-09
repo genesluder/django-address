@@ -1,6 +1,6 @@
 from django.contrib import admin
 from address.models import AddressField
-from address.forms import AddressWidget
+from address.forms import AutocompleteAddressWidget
 from .models import Person
 
 
@@ -14,7 +14,7 @@ class PersonAdmin(admin.ModelAdmin):
 
     formfield_overrides = {
         AddressField: {
-            'widget': AddressWidget(
+            'widget': AutocompleteAddressWidget(
                 attrs={
                     'style': 'width: 300px;'
                 }

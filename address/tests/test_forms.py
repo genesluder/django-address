@@ -1,14 +1,14 @@
 from django.test import TestCase
 from django.forms import ValidationError, Form
-from address.forms import AddressField, AddressWidget
+from address.forms import AutocompleteAddressField, AutocompleteAddressWidget
 from address.models import Address
 
 
 class TestForm(Form):
-    address = AddressField()
+    address = AutocompleteAddressField()
 
 
-class AddressFieldTestCase(TestCase):
+class AutocompleteAddressFieldTestCase(TestCase):
 
     def setUp(self):
         self.form = TestForm()
@@ -70,7 +70,7 @@ class AddressFieldTestCase(TestCase):
 class AddressWidgetTestCase(TestCase):
 
     def test_attributes_set_correctly(self):
-        wid = AddressWidget(attrs={'size': '150'})
+        wid = AutocompleteAddressWidget(attrs={'size': '150'})
         self.assertEqual(wid.attrs['size'], '150')
         html = wid.render('test', None)
         self.assertNotEqual(html.find('size="150"'), -1)

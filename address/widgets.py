@@ -15,7 +15,7 @@ USE_DJANGO_JQUERY = getattr(settings, 'USE_DJANGO_JQUERY', False)
 JQUERY_URL = getattr(settings, 'JQUERY_URL', 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js')
 
 
-class AddressWidget(forms.TextInput):
+class AutocompleteAddressWidget(forms.TextInput):
     components = [('country', 'country'), ('country_code', 'country_short'),
                   ('locality', 'locality'), ('sublocality', 'sublocality'), ('neighborhood', 'neighborhood'),
                   ('postal_code', 'postal_code'), ('route', 'route'),
@@ -55,7 +55,7 @@ class AddressWidget(forms.TextInput):
         classes += (' ' if classes else '') + 'address'
         attrs['class'] = classes
         kwargs['attrs'] = attrs
-        super(AddressWidget, self).__init__(*args, **kwargs)
+        super(AutocompleteAddressWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, **kwargs):
 
@@ -73,7 +73,7 @@ class AddressWidget(forms.TextInput):
         # Generate the elements. We should create a suite of hidden fields
         # For each individual component, and a visible field for the raw
         # input. Begin by generating the raw input.
-        elems = [super(AddressWidget, self).render(name, ad.get('formatted', None), attrs, **kwargs)]
+        elems = [super(AutocompleteAddressWidget, self).render(name, ad.get('formatted', None), attrs, **kwargs)]
 
         # Now add the hidden fields.
         elems.append('<div id="%s_components">' % name)

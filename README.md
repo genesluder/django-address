@@ -162,10 +162,10 @@ class Person(models.Model):
 The form:
 
 ```
-from address.forms import AddressField
+from address.forms import AutocompleteAddressField
 
 class PersonForm(forms.Form):
-  address = AddressField()
+  address = AutocompleteAddressField()
 ```
 
 The template:

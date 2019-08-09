@@ -40,6 +40,7 @@ def _to_python(value):
     formatted = value.get('formatted', '')
     latitude = value.get('latitude', None)
     longitude = value.get('longitude', None)
+    verified = value.get('verified', False)
 
     # If there is no value (empty raw) then return None.
     if not raw:
@@ -117,6 +118,7 @@ def _to_python(value):
             formatted=formatted,
             latitude=latitude,
             longitude=longitude,
+            verified=verified
         )
 
         # If "formatted" is empty try to construct it from other values.
@@ -197,7 +199,7 @@ class State(models.Model):
 
     class Meta:
         unique_together = ('name', 'country')
-        ordering = ('country', 'name')
+        ordering = ('name',)
 
     def __str__(self):
         txt = self.to_str()
@@ -224,7 +226,7 @@ class Locality(models.Model):
     class Meta:
         verbose_name_plural = 'Localities'
         unique_together = ('name', 'postal_code', 'state')
-        ordering = ('state', 'name')
+        ordering = ('name',)
 
     def __str__(self):
         txt = '%s' % self.name
@@ -254,7 +256,7 @@ class Neighborhood(models.Model):
     class Meta:
         verbose_name_plural = 'Neighborhoods'
         unique_together = ('name', 'postal_code', 'locality')
-        ordering = ('locality', 'name')
+        ordering = ('name',)
 
     def __str__(self):
         txt = '%s' % self.name
@@ -286,6 +288,7 @@ class Address(models.Model):
     formatted = models.CharField(max_length=200, blank=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    verified = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'Addresses'
@@ -320,8 +323,8 @@ class Address(models.Model):
             route=self.route,
             raw=self.raw,
             formatted=self.formatted,
-            latitude=self.latitude if self.latitude else '',
-            longitude=self.longitude if self.longitude else '',
+            latitude=self.latitude if self.latitude else None,
+            longitude=self.longitude if self.longitude else None,
         )
         if self.locality:
             ad['locality'] = self.locality.name

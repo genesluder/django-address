@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.safestring import mark_safe
 
 from .models import Address, to_python
-from .widgets import AddressWidget
+from .widgets import AutocompleteAddressWidget
 
 if sys.version > '3':
     long = int
@@ -16,18 +16,29 @@ if sys.version > '3':
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['AddressWidget', 'AddressField']
+__all__ = [
+    'AddressField',
+    'AutocompleteAddressWidget', 
+    'AutocompleteAddressField',
+]
 
 if not settings.GOOGLE_API_KEY:
     raise ImproperlyConfigured("GOOGLE_API_KEY is not configured in settings.py")
 
 
 class AddressField(forms.ModelChoiceField):
-    widget = AddressWidget
+
+    def __init__(self, *args, **kwargs):
+        #kwargs['queryset'] = Address.objects.none()
+        super(AddressField, self).__init__(*args, **kwargs)
+
+
+class AutocompleteAddressField(forms.ModelChoiceField):
+    widget = AutocompleteAddressWidget
 
     def __init__(self, *args, **kwargs):
         kwargs['queryset'] = Address.objects.none()
-        super(AddressField, self).__init__(*args, **kwargs)
+        super(AutocompleteAddressField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
 
